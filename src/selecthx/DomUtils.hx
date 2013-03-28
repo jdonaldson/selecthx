@@ -3,10 +3,10 @@ import js.Lib;
 
 #if !haxe3
 import js.Dom;
-// typedef Browser = Lib;
-// typedef HTMLCollection = js.Dom.HtmlCollection<js.Dom.HtmlDom>
-// typedef HtmlElement = js.Dom.HtmlDom;
-// typedef Document = js.Dom.HtmlDom;
+typedef Browser = Lib;
+typedef HTMLCollection = js.Dom.HtmlCollection<js.Dom.HtmlDom>
+typedef HtmlElement = js.Dom.HtmlDom;
+typedef Document = js.Dom.HtmlDom;
 #else
 import js.Browser;
 import js.html.HTMLCollection;
