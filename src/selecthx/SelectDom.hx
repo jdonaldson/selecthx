@@ -2,26 +2,30 @@ package selecthx;
 import selecthx.Type;
 
 import haxe.macro.Expr;
-#if (js && !haxe3)
-// typedef HtmlElement = js.Dom.HtmlDom;
-// typedef Document = js.Dom.HtmlDom;
-// typedef Browser = js.Lib;
-// typedef HTMLCollection = js.Dom.HtmlCollection<js.Dom.HtmlDom>;
-// typedef ExprOf = haxe.macro.ExprRequre;
-// typedef Node = js.Dom.HtmlDom;
-#elseif (js && haxe3)
+
+
+#if (js && haxe3) // js & haxe3 get latest dom types
 import js.Browser;
 import js.html.HTMLCollection;
 import js.html.HtmlElement;
 import selecthx.ParentNode;
 import selecthx.DomUtils;
-#elseif macro
-import haxe.macro.Context;
-typedef HtmlElement = Dynamic;
-typedef Node = Dynamic;
+#elseif js // old js gets old typedefs
+typedef ExprOf<T> = haxe.macro.ExprRequire<T>;
+import selecthx.DomUtils;
 #end
 
-typedef Hash<T> = Map<String, T>;
+#if haxe3 // import a stringmap type for (js|macro)
+import haxe.ds.StringMap;
+#else
+typedef StringMap<T> = Hash<T>;
+#end
+
+#if macro // ignore typing for elements in macros
+import haxe.macro.Context;
+typedef HtmlElement = Dynamic;
+#end
+
 
 class SelectDom {
 #if js
@@ -137,8 +141,8 @@ class SelectDom {
         var pos = Context.currentPos();
         // Generate actual function call
         var pack = { expr: EConst(CIdent("selecthx")), pos: pos };
-        // var type = { expr: EType(pack, "SelectDom"), pos: pos };
-        var func = { expr: EField(macro selecthx.SelectDom, funcName), pos: pos };
+        var type = { expr: EType(pack, "SelectDom"), pos: pos };
+        var func = { expr: EField(type, funcName), pos: pos };
         var call = { expr: ECall(func, args), pos: pos };
         // Generate self executing function
         // eg. (function():retType { return cast <...>; })();
@@ -154,7 +158,13 @@ class SelectDom {
     static function inspect(s:Selector):TypePath {
         var last = s[s.length - 1];
         // Default to HtmlElement (base for all html elements in haxe)
-        var type = last.tag == null ? "HtmlElement" : tagToType(last.tag);
+#if haxe3
+        var nulltag = "HtmlElement";
+#else
+        var nulltag = "HtmlDom";
+#end
+
+        var type = last.tag == null ? nulltag : tagToType(last.tag);
 
         if (last.tag == "input") {
             // Support for different input types
@@ -183,9 +193,12 @@ class SelectDom {
 
         // Return a TypePath
         // eg. Null<js.Dom.HtmlElement>, Array<js.Dom.Anchor>
-        // var typePath =  { name: "Dom", pack: ["js"], params: [], sub: type, }
+#if haxe3
         if (type != "HtmlElement") type = type + "Element";
         var typePath =  { name: type, pack: ["js","html"], params: [], }
+#else
+        var typePath =  { name: "Dom", pack: ["js"], params: [], sub: type, }
+#end
         return { name: isSingular(s) ? "Null" : "Array", pack: [], params: [TPType(TPath(typePath))], sub: null }
     }
 
@@ -216,7 +229,7 @@ class SelectDom {
     }
 
     static function tagToType(tag:String):String {
-        var map = new Hash<String>();
+        var map = new StringMap<String>();
         map.set("form", "Form");
         map.set("a", "Anchor");
         map.set("body", "Body");

@@ -1,9 +1,8 @@
 package selecthx;
 import selecthx.Type;
 #if !haxe3
-// typedef HtmlElement = js.Dom.HtmlDom;
-// typedef Browser = js.Lib;
-// import js.Dom.InputElement;
+typedef InputElement = js.Dom.FormElement;
+import selecthx.DomUtils;
 #else
 import js.Browser;
 import js.html.HtmlElement;
