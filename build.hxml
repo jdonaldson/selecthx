@@ -1,0 +1,5 @@
+-cp test
+-cp src
+-main Test
+-js out.js
+-cmd phantomjs out.js
