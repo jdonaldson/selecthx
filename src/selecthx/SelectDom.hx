@@ -72,6 +72,7 @@ class SelectDom {
         }
 #end
         var lexer = new RegexLexer(selector);
+
         var parser = new Parser(lexer);
         var s = parser.parse();
         var engine = new SelectEngine();
@@ -175,16 +176,41 @@ class SelectDom {
                 switch(i.operator) {
                     case Exactly:
                         switch(i.value) {
+                            // case "image":    type = "js.Dom." ???
+                            // case "file":     type = "FileUpload"; // removed: Invalid
+                            case "a":      type = "Anchor"; // added
+                            case "area":      type = "Area"; // added
+                            case "body":      type = "Body"; // added
                             case "button":   type = "Button";
                             case "checkbox": type = "Checkbox";
-                            case "file":     type = "FileUpload";
                             case "hidden":   type = "Hidden";
-                            // case "image":    type = "js.Dom."
+                            case "img":    type = "Image"; // added
+                            case "option":    type = "Option"; // added
                             case "password": type = "Password";
                             case "radio":    type = "Radio";
                             case "reset":    type = "Reset";
+                            case "select":    type = "Select"; // added
+                            case "style":    type = "Style"; // added
+                            case "style":    type = "Style"; // added
                             case "submit":   type = "Submit";
                             case "text":     type = "Text";
+                            case "textarea":     type = "TextArea"; //added
+#if (html4 || html4_deprecated)
+                            case "frame":     type = "Frame";
+                            case "frameset":     type = "FrameSet";
+#if !html4
+                            case "audio":      type = "Audio";
+                            case "base":      type = "Base";
+                            case "canvas":     type = "Canvas";
+                            case "datalist":   type = "DataList";
+                            case "details":    type = "Details";
+                            case "keygen":     type = "KeyGen";
+                            case "meter":      type = "Meter";
+                            case "output":     type = "Output";
+                            case "progress":   type = "Progress";
+                            case "track":      type = "Track";
+                            case "video":      type = "Video";
+#end
                         }
                     default:
                 }
