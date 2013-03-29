@@ -141,8 +141,9 @@ class SelectDom {
     static function makeFunc(funcName:String, args:Array<Expr>, retType:TypePath):Expr {
         var pos = Context.currentPos();
         // Generate actual function call
-        var pack = { expr: EConst(CIdent("selecthx")), pos: pos };
-        var type = { expr: EType(pack, "SelectDom"), pos: pos };
+        // var pack = { expr: EConst(CIdent("selecthx")), pos: pos };
+        // var type = { expr: EType(pack, "SelectDom"), pos: pos }; // haxe3 incompatible
+        var type = macro selecthx.SelectDom;
         var func = { expr: EField(type, funcName), pos: pos };
         var call = { expr: ECall(func, args), pos: pos };
         // Generate self executing function
@@ -176,41 +177,16 @@ class SelectDom {
                 switch(i.operator) {
                     case Exactly:
                         switch(i.value) {
-                            // case "image":    type = "js.Dom." ???
-                            // case "file":     type = "FileUpload"; // removed: Invalid
-                            case "a":      type = "Anchor"; // added
-                            case "area":      type = "Area"; // added
-                            case "body":      type = "Body"; // added
                             case "button":   type = "Button";
                             case "checkbox": type = "Checkbox";
+                            case "file":     type = "FileUpload";
                             case "hidden":   type = "Hidden";
-                            case "img":    type = "Image"; // added
-                            case "option":    type = "Option"; // added
+                            // case "image":    type = "js.Dom."
                             case "password": type = "Password";
                             case "radio":    type = "Radio";
                             case "reset":    type = "Reset";
-                            case "select":    type = "Select"; // added
-                            case "style":    type = "Style"; // added
-                            case "style":    type = "Style"; // added
                             case "submit":   type = "Submit";
                             case "text":     type = "Text";
-                            case "textarea":     type = "TextArea"; //added
-#if (html4 || html4_deprecated)
-                            case "frame":     type = "Frame";
-                            case "frameset":     type = "FrameSet";
-#if !html4
-                            case "audio":      type = "Audio";
-                            case "base":      type = "Base";
-                            case "canvas":     type = "Canvas";
-                            case "datalist":   type = "DataList";
-                            case "details":    type = "Details";
-                            case "keygen":     type = "KeyGen";
-                            case "meter":      type = "Meter";
-                            case "output":     type = "Output";
-                            case "progress":   type = "Progress";
-                            case "track":      type = "Track";
-                            case "video":      type = "Video";
-#end
                         }
                     default:
                 }
@@ -256,19 +232,50 @@ class SelectDom {
 
     static function tagToType(tag:String):String {
         var map = new StringMap<String>();
-        map.set("form", "Form");
+
+// universal elements
         map.set("a", "Anchor");
+        map.set("area", "Area");
         map.set("body", "Body");
         map.set("button", "Button");
-        map.set("frame", "Frame");
-        map.set("frameset", "Frameset");
+        map.set("form", "Form");
         map.set("iframe", "IFrame");
         map.set("img", "Image");
+        map.set("input", "FormElement");
+        map.set("option", "Option");
+        map.set("password", "Password");
+        map.set("radio", "Radio");
         map.set("select", "Select");
         map.set("style", "StyleSheet");
-        map.set("input", "FormElement");
         map.set("textarea", "Textarea");
+
+// html4 deprecated elements
+#if (html4 || html4_deprecated)
+        map.set("frame", "Frame");
+        map.set("frameset", "Frameset");
+#end
+
+// html5+ elements
+#if (!html4 && haxe3)
+        map.set("audio", "Audio");
+        map.set("base", "Base");
+        map.set("canvas", "Canvas");
+        map.set("datalist", "DataList");
+        map.set("details", "Details");
+        map.set("keygen", "KeyGen");
+        map.set("meter", "Meter");
+        map.set("output", "Output");
+        map.set("progress", "Progress");
+        map.set("track", "Track");
+        map.set("video", "Video");
+#end
+
+// set a generic element for unknowns. TODO: use UnknownElement?
+#if haxe3
         return map.exists(tag) ? map.get(tag) : "HtmlElement";
+#else
+        return map.exists(tag) ? map.get(tag) : "HtmlDom";
+#end
     }
 
     static function makeLocalPos(pos:Position, epos:ErrorPos):Position {
