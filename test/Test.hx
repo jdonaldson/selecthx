@@ -7,8 +7,9 @@ import js.Browser;
 
 class  Test{
     public static function main(){
-        var header = Browser.document.select("#anid");
+        var header = Browser.document.select("#output");
+        $type(header);
         var links = header.select("a");
-        untyped phantom.exit();
+        $type(links);
     }
 }
