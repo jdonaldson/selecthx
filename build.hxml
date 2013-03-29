@@ -2,4 +2,4 @@
 -cp src
 -main Test
 -js bin/out.js
--cmd phantomjs out.js
+-cmd phantomjs bin/out.js
